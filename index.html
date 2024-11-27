@@ -104,7 +104,7 @@
 
             try {
                 // Send form data to Flask backend via POST request
-                const response = await fetch('/submit_commute', {
+                const response = await fetch('http://127.0.0.1:5000/submit_commute', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -127,44 +127,6 @@
             }
         });
     </script>
+
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

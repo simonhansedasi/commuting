@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app, resources={r"/*": {"origins": "http://127.0.0.1:4000"}})
 
 @app.route('/submit_commute', methods=['POST'])
 def submit_commute():
@@ -23,19 +23,26 @@ def submit_commute():
         raining = data.get('raining', False) # Optional field
         
         
-        print('poopy butts)
+        # print({
+        #     'start_time': start_time,
+        #     'end_time': end_time,
+        #     'transport_mode': transport_mode,
+        #     'freeway': freeway,
+        #     'lane': lane,
+        #     'raining': raining
+        # })
         
         
         # Handle the data (process, store, etc.)
         # For now, just returning the data as confirmation
-        return jsonify({
+        return (jsonify({
             'start_time': start_time,
             'end_time': end_time,
             'transport_mode': transport_mode,
             'freeway': freeway,
             'lane': lane,
             'raining': raining
-        })
+        }))
 
     except Exception as e:
         # If an error occurs, return a 400 status with the error message
