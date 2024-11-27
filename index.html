@@ -1,92 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Commute Tracker Portal</title>
-  <script>
-    // Function to show or hide additional options based on transport mode
-    function updateTransportOptions() {
-      var transportMode = document.getElementById("transport_mode").value;
-      var freewayOptions = document.getElementById("freeway_options");
-      var laneOptions = document.getElementById("lane_options");
-
-      // Show options for 'Freeway' and 'Back Way' only if 'Car' is selected
-      if (transportMode === "car") {
-        freewayOptions.style.display = "block";
-      } else {
-        freewayOptions.style.display = "none";
-        laneOptions.style.display = "none"; // Hide lane options when not on freeway
-      }
-
-      // Show lane options only if 'Freeway' is selected
-      var freewaySelect = document.getElementById("freeway");
-      if (freewaySelect.value === "freeway") {
-        laneOptions.style.display = "block";
-      } else {
-        laneOptions.style.display = "none";
-      }
-    }
-  </script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Commute Tracker Portal</title>
 </head>
 <body>
   <h1>Welcome to the Commute Tracker Portal</h1>
-  <p>This portal allows you to log your commutes and track delays caused by weather conditions like rain.</p>
+  <p>This is an independent project to attempt to measure how much rain impacts commute times. Right now it's just me and you, pal.</p>
+  <p>Questions? Email me at <a href="mailto:simonhansedasi@gmail.com">simonhansedasi@gmail.com</a>
+</p>
+    <h2>Submit Your Commute Data</h2>
+    <form id="commuteForm" action="http://127.0.0.1:5000/submit_commute" method="POST">
+        <div>
+            <label for="start_time">Start Time:</label>
+            <input type="time" id="start_time" name="start_time" required>
+        </div>
+        <div>
+            <label for="end_time">End Time:</label>
+            <input type="time" id="end_time" name="end_time" required>
+        </div>
+        <div>
+            <label for="transport_mode">Main Mode of Transport:</label>
+            <select id="transport_mode" name="transport_mode" required onchange="updateTransportOptions()">
+                <option value="" disabled selected>Select</option>
+                <option value="car">Car</option>
+                <option value="bus">Bus</option>
+                <option value="train">Train</option>
+                <option value="bike">Bike</option>
+                <option value="walk">Walk</option>
+                <option value="other">Other</option>
+            </select>
+        </div>
 
-  <h2>Log Your Commute</h2>
-  
-  <form action="/submit_commute" method="POST">
-    <div>
-      <label for="start_time">Start Time:</label>
-      <input type="time" id="start_time" name="start_time" required>
-    </div>
-    <div>
-      <label for="end_time">End Time:</label>
-      <input type="time" id="end_time" name="end_time" required>
-    </div>
-    <div>
-      <label for="transport_mode">Main Mode of Transport:</label>
-	<select id="transport_mode" name="transport_mode" required onchange="updateTransportOptions()">
-	  <option value="" disabled selected>Select</option>
-	  <option value="car">Car</option>
-	  <option value="bus">Bus</option>
-  	  <option value="train">Train</option>
-	  <option value="bike">Bike</option>
-	  <option value="walk">Walk</option>
-	  <option value="other">Other</option>
-	</select>
-    </div>
+        <!-- Additional options for 'Car' -->
+        <div id="freeway_options" style="display:none;">
+            <label for="freeway">Route Type:</label>
+            <select id="freeway" name="freeway" onchange="updateTransportOptions()">
+                <option value="backway">Back Way</option>
+                <option value="freeway">Freeway</option>
+            </select>
+        </div>
 
-    <!-- Additional options for 'Car' -->
-    <div id="freeway_options" style="display:none;">
-      <label for="freeway">Route Type:</label>
-      <select id="freeway" name="freeway" onchange="updateTransportOptions()">
-        <option value="backway">Back Way</option>
-        <option value="freeway">Freeway</option>
-      </select>
-    </div>
+        <!-- Additional options for Freeway (if freeway is selected) -->
+        <div id="lane_options" style="display:none;">
+            <label for="lane">Which Lane?</label>
+            <select id="lane" name="lane">
+                <option value="left">Left</option>
+                <option value="center">Center</option>
+                <option value="right">Right</option>
+                <option value="multi">Multi-lane</option>
+            </select>
+        </div>
 
-    <!-- Additional options for Freeway (if freeway is selected) -->
-    <div id="lane_options" style="display:none;">
-      <label for="lane">Which Lane?</label>
-      <select id="lane" name="lane">
-        <option value="left">Left</option>
-        <option value="center">Center</option>
-        <option value="right">Right</option>
-        <option value="multi">Multi-lane</option>
-      </select>
-    </div>
+        <div>
+            <label for="raining">Rain?</label>
+            <input type="checkbox" id="raining" name="raining">
+        </div>
+        <div>
+            <button type="submit">Submit Commute</button>
+        </div>
+    </form>
 
-    <div>
-      <label for="raining">Rain?</label>
-      <input type="checkbox" id="raining" name="raining">
-    </div>
-    <div>
-      <button type="submit">Submit Commute</button>
-    </div>
-  </form>
+    <div id="responseMessage"></div>
 
+    <script>
+        // Handle the transport options based on selected transport mode
+        function updateTransportOptions() {
+            const transportMode = document.getElementById("transport_mode").value;
+            const freewayOptions = document.getElementById("freeway_options");
+            const laneOptions = document.getElementById("lane_options");
+
+            // Toggle freeway and lane options if "Car" is selected
+            if (transportMode === "car") {
+                freewayOptions.style.display = "block";
+            } else {
+                freewayOptions.style.display = "none";
+                laneOptions.style.display = "none"; // Reset lane options if not car
+            }
+
+            // Show lane options if "Freeway" is selected
+            const freeway = document.getElementById("freeway");
+            if (freeway && freeway.value === "freeway") {
+                laneOptions.style.display = "block";
+            } else {
+                laneOptions.style.display = "none";
+            }
+        }
+
+        // Handle form submission via JavaScript (AJAX request)
+        document.getElementById('commuteForm').addEventListener('submit', async function(e) {
+            e.preventDefault();  // Prevent default form submission
+
+            // Collect the form data
+            const formData = {
+                start_time: document.getElementById('start_time').value,
+                end_time: document.getElementById('end_time').value,
+                transport_mode: document.getElementById('transport_mode').value,
+                freeway: document.getElementById('freeway') ? document.getElementById('freeway').value : null,
+                lane: document.getElementById('lane') ? document.getElementById('lane').value : null,
+                raining: document.getElementById('raining').checked
+            };
+
+            try {
+                // Send form data to Flask backend via POST request
+                const response = await fetch('/submit_commute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
+
+                // Check if the response is successful
+                const result = await response.json();
+
+                if (response.ok) {
+                    document.getElementById('responseMessage').innerText = 'Commute submitted successfully!';
+                } else {
+                    document.getElementById('responseMessage').innerText = 'Error submitting commute: ' + result.error;
+                }
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('responseMessage').innerText = 'An error occurred while submitting the commute form.';
+            }
+        });
+    </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

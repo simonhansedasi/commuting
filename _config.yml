@@ -1,4 +1,4 @@
 title: Commute Tracker Portal
-baseurl: "/portal"  # Leave empty since `portal/` is now the root directory
+baseurl: ""  # Leave empty since `portal/` is now the root directory
 url:  "https://simonhansedasi.github.io/commuting" # GitHub Pages URL
 
