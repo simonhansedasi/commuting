@@ -4,129 +4,347 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Commute Tracker Portal</title>
+<style>
+    .dashboard {
+        margin-top: 20px;
+        display: none;
+        clear: both;  /* Ensures elements below the dashboard are properly aligned */
+        text-align: center;  /* Centers the content of the dashboard */
+    }
+
+    .table-container {
+        display: inline-block;   /* Makes the div behave like an inline element */
+        width: 45%;              /* Each table container takes up 45% of the available space */
+        vertical-align: top;     /* Align the containers to the top */
+        margin: 0 2.5%;          /* Adds space between the tables */
+    }
+
+    .table-container img {
+        max-width: 100%;         /* Ensures the chart fits within the container */
+        display: block;
+        margin: 20px auto;       /* Centers the chart and adds space between the table and chart */
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    table, th, td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: center;
+    }
+
+    .dashboard-content h3 {
+        text-align: center;
+    }
+
+    ul {
+        list-style-type: none;   /* Removes bullet points */
+        padding: 0;              /* Removes padding */
+    }
+
+    li {
+        margin-bottom: 5px;      /* Adds spacing between list items */
+    }
+</style>
+
 </head>
 <body>
   <h1>Welcome to the Commute Tracker Portal</h1>
-  <p>This is an independent project to attempt to measure how much rain impacts commute times. Right now it's just me and you, pal.</p>
-  <p>Questions? Email me at <a href="mailto:simonhansedasi@gmail.com">simonhansedasi@gmail.com</a>
-</p>
-    <h2>Submit Your Commute Data</h2>
-    <form id="commuteForm" action="http://127.0.0.1:5000/submit_commute" method="POST">
-        <div>
-            <label for="start_time">Start Time:</label>
-            <input type="time" id="start_time" name="start_time" required>
-        </div>
-        <div>
-            <label for="end_time">End Time:</label>
-            <input type="time" id="end_time" name="end_time" required>
-        </div>
-        <div>
-            <label for="transport_mode">Main Mode of Transport:</label>
-            <select id="transport_mode" name="transport_mode" required onchange="updateTransportOptions()">
-                <option value="" disabled selected>Select</option>
-                <option value="car">Car</option>
-                <option value="bus">Bus</option>
-                <option value="train">Train</option>
-                <option value="bike">Bike</option>
-                <option value="walk">Walk</option>
-                <option value="other">Other</option>
-            </select>
-        </div>
+  <p>This is an independent project to better understand commutes. Right now, it's just me and you, pal.</p>
+  <p>Questions? Email me at <a href="mailto:simonhansedasi@gmail.com">simonhansedasi@gmail.com</a></p>
 
-        <!-- Additional options for 'Car' -->
-        <div id="freeway_options" style="display:none;">
-            <label for="freeway">Route Type:</label>
-            <select id="freeway" name="freeway" onchange="updateTransportOptions()">
-                <option value="backway">Back Way</option>
-                <option value="freeway">Freeway</option>
-            </select>
-        </div>
 
-        <!-- Additional options for Freeway (if freeway is selected) -->
-        <div id="lane_options" style="display:none;">
-            <label for="lane">Which Lane?</label>
-            <select id="lane" name="lane">
-                <option value="left">Left</option>
-                <option value="center">Center</option>
-                <option value="right">Right</option>
-                <option value="multi">Multi-lane</option>
-            </select>
-        </div>
 
-        <div>
-            <label for="raining">Rain?</label>
-            <input type="checkbox" id="raining" name="raining">
-        </div>
-        <div>
-            <button type="submit">Submit Commute</button>
-        </div>
-    </form>
+<div id="userSection">
+    <h3>Enter User Details</h3>
+    <p>This is merely a measure to reduce the risk of multiple users overwriting data. Enter a desired username and have a userID generated. To keep tracking your commutes, you will need to return with your userID.</p>
+    <label for="userIdInput">UserID (if existing):</label>
+    <input type="text" id="userIdInput" placeholder="Enter your UserID">
+    <p>OR</p>
+    <label for="usernameInput">New Username:</label>
+    <input type="text" id="usernameInput" placeholder="Enter a new username">
+    <button id="verifyButton">Verify/Submit</button>
+</div>
 
-    <div id="responseMessage"></div>
 
-    <script>
-        // Handle the transport options based on selected transport mode
-        function updateTransportOptions() {
-            const transportMode = document.getElementById("transport_mode").value;
-            const freewayOptions = document.getElementById("freeway_options");
-            const laneOptions = document.getElementById("lane_options");
+<div id="responseMessage"></div>
+<div id="resultContainer"></div>
 
-            // Toggle freeway and lane options if "Car" is selected
-            if (transportMode === "car") {
-                freewayOptions.style.display = "block";
+  <form id="commuteForm" style="display: none;">
+  <h2>Submit Your Commute Data</h2>
+
+
+    <div>
+        <label for="start_time">Start Time:</label>
+        <input type="time" id="start_time" name="start_time" required>
+    </div>
+    <div>
+        <label for="end_time">End Time:</label>
+        <input type="time" id="end_time" name="end_time" required>
+    </div>
+    <div>
+        <label for="transport_mode">Main Mode of Transport:</label>
+        <select id="transport_mode" name="transport_mode" required onchange="updateTransportOptions()">
+            <option value="" disabled selected>Select</option>
+            <option value="car">Car</option>
+            <option value="bus">Bus</option>
+            <option value="train">Train</option>
+            <option value="bike">Bike</option>
+            <option value="walk">Walk</option>
+            <option value="other">Other</option>
+        </select>
+    </div>
+
+    <!-- Additional options for 'Car' -->
+    <div id="freeway_options" style="display:none;">
+        <label for="freeway">Route Type:</label>
+        <select id="freeway" name="freeway" onchange="updateTransportOptions()">
+            <option value="" disabled selected>Select</option>
+            <option value="backway">Back Way</option>
+            <option value="freeway">Freeway</option>
+        </select>
+    </div>
+
+    <!-- Additional options for Freeway (if freeway is selected) -->
+    <div id="lane_options" style="display:none;">
+        <label for="lane">Which Lane?</label>
+        <select id="lane" name="lane">
+            <option value="" disabled selected>Select</option>
+            <option value="left">Left</option>
+            <option value="center">Center</option>
+            <option value="right">Right</option>
+            <option value="multi">Multi-lane</option>
+        </select>
+    </div>
+
+    <div>
+        <label for="raining">Rain?</label>
+        <input type="checkbox" id="raining" name="raining">
+    </div>
+    <div>
+        <button type="submit" id="submitButton">Submit Commute</button>
+    </div>
+  </form>
+
+  <div id="responseMessage"></div>
+  <div id="dashboard" class="dashboard">
+      <h2>Commute Data Dashboard</h2>
+      <div id="dashboardContent"></div>
+  </div>
+  
+  
+<script>
+    document.getElementById('usernameForm').addEventListener('submit', async function (e) {
+        e.preventDefault();  // Prevent the default form submission
+
+        const username = document.getElementById('username').value;
+
+        // Send the username to the backend for validation
+        const response = await fetch('http://127.0.0.1:5000/check_username', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ username }),
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            // Display the success message (e.g., new userID)
+            document.getElementById('responseMessage').innerText = 'Username accepted! Your userID is: ' + result.user_id;
+        } else {
+            // Display error message if the username is taken
+            document.getElementById('responseMessage').innerText = 'Error: ' + result.message;
+        }
+    });
+</script>  
+  <script>
+const userIdInput = document.getElementById('userIdInput');
+const usernameInput = document.getElementById('usernameInput');
+const verifyButton = document.getElementById('verifyButton');
+const commuteForm = document.getElementById('commuteForm');
+const resultContainer = document.getElementById('resultContainer');
+
+verifyButton.addEventListener('click', async () => {
+    const userId = userIdInput.value.trim();
+    const username = usernameInput.value.trim();
+
+    if (!userId && !username) {
+        alert('Please enter either a UserID or a Username.');
+        return;
+    }
+
+    try {
+        if (userId) {
+            // Verify existing user
+            const response = await fetch('http://127.0.0.1:5000/verify_user', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_id: userId })
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                resultContainer.innerHTML = `
+                    <p>Welcome back, ${result.username}!</p>
+                `;
+                usernameInput.value = result.username; // Populate the username input field with the verified username
+                commuteForm.style.display = 'block';
+                submitButton.style.display = 'block'; // Show the submit button
+
+
             } else {
-                freewayOptions.style.display = "none";
-                laneOptions.style.display = "none"; // Reset lane options if not car
+                resultContainer.innerHTML = `<p style="color: red;">Error: ${result.message}</p>`;
             }
+        } else {
+            // Register a new user
+            const response = await fetch('http://127.0.0.1:5000/check_username', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username })
+            });
 
-            // Show lane options if "Freeway" is selected
-            const freeway = document.getElementById("freeway");
-            if (freeway && freeway.value === "freeway") {
-                laneOptions.style.display = "block";
+            const result = await response.json();
+            if (response.ok) {
+                resultContainer.innerHTML = `
+                    <p>Username accepted! Your userID is: <strong>${result.user_id}</strong></p>
+                `;
+                usernameInput.value = username; // Populate the username field in the form
+                commuteForm.style.display = 'block'; // Show the commute form
+                submitButton.style.display = 'block'; // Show the submit button
             } else {
-                laneOptions.style.display = "none";
+                resultContainer.innerHTML = `<p style="color: red;">Error: ${result.message}</p>`;
             }
         }
+    } catch (error) {
+        console.error('Error:', error);
+        resultContainer.innerHTML = `<p>An unexpected error occurred.</p>`;
+    }
+});
 
-        // Handle form submission via JavaScript (AJAX request)
-        document.getElementById('commuteForm').addEventListener('submit', async function(e) {
-            e.preventDefault();  // Prevent default form submission
+    </script>
+  
+  
+<script>
+// Handle the transport options based on selected transport mode
+function updateTransportOptions() {
+    const transportMode = document.getElementById("transport_mode").value;
+    const freewayOptions = document.getElementById("freeway_options");
+    const laneOptions = document.getElementById("lane_options");
+    
+    // Initially hide both freeway options and lane options
+    freewayOptions.style.display = "none";
+    laneOptions.style.display = "none";
 
-            // Collect the form data
-            const formData = {
-                start_time: document.getElementById('start_time').value,
-                end_time: document.getElementById('end_time').value,
-                transport_mode: document.getElementById('transport_mode').value,
-                freeway: document.getElementById('freeway') ? document.getElementById('freeway').value : null,
-                lane: document.getElementById('lane') ? document.getElementById('lane').value : null,
-                raining: document.getElementById('raining').checked
+    if (transportMode === "car") {
+        freewayOptions.style.display = "block"; // Show freeway options
+    }
+
+    const freeway = document.getElementById("freeway");
+    if (freeway && freeway.value === "freeway") {
+        laneOptions.style.display = "block"; // Show lane options if Freeway selected
+    }
+}
+
+// Handle form submission via JavaScript (AJAX request)
+document.getElementById('commuteForm').addEventListener('submit', async function(e) {
+    e.preventDefault();  // Prevent default form submission
+
+    // Collect the form data
+    const formData = {
+        username: usernameInput.value,  // Use the username from the input field
+        start_time: document.getElementById('start_time').value,
+        end_time: document.getElementById('end_time').value,
+        transport_mode: document.getElementById('transport_mode').value,
+        freeway: document.getElementById('freeway') ? document.getElementById('freeway').value : null,
+        lane: document.getElementById('lane') ? document.getElementById('lane').value : null,
+        raining: document.getElementById('raining').checked
+    };
+
+    try {
+        // Send form data to Flask backend via POST request
+        const response = await fetch('http://127.0.0.1:5000/submit_commute', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(formData),
+        });
+        console.log('Response received:', response);  // Log the response object
+
+        const result = await response.json();
+        console.log('Response JSON:', result);  // Log the result JSON
+
+        if (response.ok) {
+            document.getElementById('submitButton').style.display = 'none';
+
+            // Successfully submitted, update the dashboard with the results
+            const dashboard = document.getElementById('dashboard');
+            dashboard.style.display = 'block'; // Show the dashboard
+
+            const dashboardContent = document.getElementById('dashboardContent');
+
+
+            // Display the with_rain dictionary (Formatted)
+            if (typeof result.with_rain === 'object') {
+                let withRainContent = '<h3>Commute with Rain by Mode:</h3><ul>';
+                for (const [mode, time] of Object.entries(result.with_rain)) {
+                    withRainContent += `<li><strong>${mode}:</strong> ${formatNumber(time)} minutes</li>`;
+                }
+                withRainContent += '</ul>';
+                dashboardContent.innerHTML += `<div class="table-container">${withRainContent}</div>`;
+            }
+
+            // Display the no_rain dictionary (Formatted)
+            if (typeof result.no_rain === 'object') {
+                let noRainContent = '<h3>Commute without Rain by Mode:</h3><ul>';
+                for (const [mode, time] of Object.entries(result.no_rain)) {
+                    noRainContent += `<li><strong>${mode}:</strong> ${formatNumber(time)} minutes</li>`;
+                }
+                noRainContent += '</ul>';
+                dashboardContent.innerHTML += `<div class="table-container">${noRainContent}</div>`;
+            }
+
+            // Load and display the chart images
+            const chartWithRainImage = document.createElement('img');
+            chartWithRainImage.src = result.with_rain_chart;  // Image path for with rain chart
+            chartWithRainImage.alt = "Commute with Rain Chart";
+            chartWithRainImage.style.maxWidth = '500px';  // Optional styling
+            chartWithRainImage.onload = function() {
+                dashboardContent.appendChild(chartWithRainImage); // Append chart image once it's loaded
             };
 
-            try {
-                // Send form data to Flask backend via POST request
-                const response = await fetch('http://127.0.0.1:5000/submit_commute', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify(formData),
-                });
+            const chartNoRainImage = document.createElement('img');
+            chartNoRainImage.src = result.no_rain_chart;  // Image path for no rain chart
+            chartNoRainImage.alt = "Commute without Rain Chart";
+            chartNoRainImage.style.maxWidth = '500px';  // Optional styling
+            chartNoRainImage.onload = function() {
+                dashboardContent.appendChild(chartNoRainImage); // Append chart image once it's loaded
+            };
 
-                // Check if the response is successful
-                const result = await response.json();
+        } else {
+            alert("Error submitting commute.");
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred while submitting the commute form.');
+    }
+});
 
-                if (response.ok) {
-                    document.getElementById('responseMessage').innerText = 'Commute submitted successfully!';
-                } else {
-                    document.getElementById('responseMessage').innerText = 'Error submitting commute: ' + result.error;
-                }
+// Helper function to format numbers with commas replaced by periods
+function formatNumber(number) {
+    return parseFloat(number).toFixed(2);  // Limit to 2 decimal places
+}
+</script>
 
-            } catch (error) {
-                console.error('Error:', error);
-                document.getElementById('responseMessage').innerText = 'An error occurred while submitting the commute form.';
-            }
-        });
-    </script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+// Additional jQuery functionality if needed can be added here
+</script>
 
 </body>
 </html>
