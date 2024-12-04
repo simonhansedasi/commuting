@@ -173,9 +173,10 @@ def submit_commute():
             
             
             
-        df = ca.get_data_from_db(username = username)
+        # df = ca.get_data_from_db(username = username)
         with_rain, no_rain = ca.analyze_commute_data(username)
         rain_chart_path, no_rain_chart_path = ca.plot_pie(user = username)
+        print(username, start_time, end_time, transport_mode, freeway, lane, raining, with_rain, no_rain, rain_chart_path, no_rain_chart_path)
         return (jsonify({
             'username':username,
             'start_time': start_time,

@@ -13,23 +13,28 @@ def calculate_CIs(data):
      
     m = data.commute_duration_seconds.mean()
     
-    std = data.commute_duration_seconds.std()
+    if len(data) == 1:
+        return [m / 60, 0]
     
-    n = len(data)
-    
-    sem = std / np.sqrt(n)
-    
-    t_value = stats.t.ppf(0.975, n - 1)  # 95% CI
-    
-    
-    ci_width = sem * t_value
-    
-    CI_lower = np.round(m / 60) - np.round(ci_width / 60)
-    CI_upper = np.round(m / 60) + np.round(ci_width / 60)
-    
+    else:
+        std = data.commute_duration_seconds.std()
 
-    
-    return [CI_lower, CI_upper]
+        n = len(data)
+
+        sem = std / np.sqrt(n)
+
+        t_value = stats.t.ppf(0.975, n - 1)  # 95% CI
+
+
+        ci_width = sem * t_value
+
+        CI_lower = np.round(m / 60, 0) - np.round(ci_width / 60, 0)
+        CI_upper = np.round(m / 60, 0) + np.round(ci_width / 60, 0)
+
+
+
+        return [((CI_lower + CI_upper) / 2), (CI_upper - CI_lower)]
+
 def time_to_seconds(time_obj):
     return time_obj.hour * 3600 + time_obj.minute * 60 + time_obj.second
 
@@ -84,12 +89,13 @@ def analyze_commute_data(user):
         trans_CI_wrc = calculate_CIs(df[
             (df['transport_mode'] == trans) & (df['raining'] == 1)
         ])
-        avg_wrc[trans] = trans_CI_wrc
+        avg_wrc[trans] = ['-', '-'] if np.isnan(trans_CI_wrc[0]) else trans_CI_wrc
 
         trans_CI_nrc = calculate_CIs(df[
             (df['transport_mode'] == trans) & (df['raining'] == 0)
         ])
-        avg_nrc[trans] = trans_CI_nrc
+        avg_nrc[trans] = ['-', '-'] if np.isnan(trans_CI_nrc[0]) else trans_CI_nrc
+        
     return avg_wrc, avg_nrc
 
 

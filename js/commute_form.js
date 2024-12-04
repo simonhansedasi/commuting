@@ -61,7 +61,7 @@ document.getElementById('commuteForm').addEventListener('submit', async function
             if (typeof result.with_rain === 'object') {
                 console.log(result.with_rain);
 
-                let withRainContent = '<h3>Commute with Rain</h3><ul>';
+                let withRainContent = '<h3> Avg Commute with Rain</h3><ul>';
                 for (const [mode, values] of Object.entries(result.with_rain)) {
                     const [time, err] = values;
 
@@ -80,7 +80,7 @@ document.getElementById('commuteForm').addEventListener('submit', async function
             if (typeof result.no_rain === 'object') {
                 console.log(result.no_rain);
 
-                let withNoRainContent = '<h3>Commute with no Rain</h3><ul>';
+                let withNoRainContent = '<h3>Avg Commute with no Rain</h3><ul>';
                 for (const [mode, values] of Object.entries(result.no_rain)) {
                     const [time, err] = values;
 
