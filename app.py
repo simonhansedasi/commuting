@@ -11,7 +11,7 @@ import os
 
 
 app = Flask(__name__)
-CORS(app, support_credentials = True, resources={r'/*': {'origins': ['http://127.0.0.1:4000', 'https://f301-73-83-144-18.ngrok-free.app']}})
+CORS(app, support_credentials = True, resources={r'/*': {'origins': ['http://127.0.0.1:4000', 'https://f301-73-83-144-18.ngrok-free.app','https://simonhansedasi.github.io/commuting/']}})
 # Load environment variables from .env file
 load_dotenv()
 
