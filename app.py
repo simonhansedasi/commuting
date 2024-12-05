@@ -100,7 +100,7 @@ def register_user():
             response_data['email_status'] = 'Email sent successfully'
         except Exception as e:
             response_data['email_status'] = f'Failed to send email: {str(e)}'
-        # print(response_data['email_status'])
+        print(response_data['email_status'])
 
     return jsonify(response_data), 201
 

@@ -1,6 +1,7 @@
 
 let currentUser = null;
 
+const submitButton = document.getElementById('submitButton');
 
 document.getElementById('returningUserSubmit').addEventListener('click', async function() {
     const username = document.getElementById('returningUsernameInput').value.trim();
@@ -10,6 +11,7 @@ document.getElementById('returningUserSubmit').addEventListener('click', async f
         alert('Please enter both username and pin.');
         return;
     }
+    localStorage.setItem('username', result.username);
 
     // Perform validation (e.g., check if the username and pin exist)
     const response = await fetch('https://e644-73-83-144-18.ngrok-free.app/verify_user', {
