@@ -1,24 +1,27 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Retrieve the username from localStorage
-    const currentUser = localStorage.getItem('currentUser');
+    // Wait for the loginComplete event
+    document.addEventListener('loginComplete', function () {
+        const currentUser = localStorage.getItem('currentUser');
+        const commuteFormUsername = document.getElementById('commuteFormUsername');
+        const commuteForm = document.getElementById('commuteForm');
+        if (currentUser) {
+            console.log('User found:', currentUser);
+            // Display the username in the commute form
+            document.getElementById('commuteFormUsername').innerText = `Welcome, ${currentUser}!`;
 
-    if (currentUser) {
-        // Display the username in the commute form
-        document.getElementById('commuteFormUsername').innerText = `Welcome, ${currentUser}!`;
-
-        // Ensure the commute form section is visible
-        document.getElementById('commuteFormSection').style.display = 'block';
-        document.getElementById('loginSection').style.display = 'none';
-    } 
-    
-    else {
-        // If no user is logged in, show an alert and hide the form
-        // alert('No user logged in. Please log in to access the commute form.');
-        document.getElementById('commuteFormSection').style.display = 'none';
-        document.getElementById('loginSection').style.display = 'block';
-    }
+            // Ensure the commute form section is visible
+            // document.getElementById('commuteFormSection').style.display = 'block';
+            // document.getElementById('loginSection').style.display = 'none';
+        } else {
+            console.log('No user logged in yet');
+            // Show login section if no user found
+            document.getElementById('commuteFormSection').style.display = 'none';
+            document.getElementById('loginSection').style.display = 'block';
+        }
+    });
 });
-
+console.log('Poooooooopppppp')
+// console.log('User found:', currentUser);
 
 
 
@@ -45,7 +48,9 @@ function updateTransportOptions() {
 // Handle form submission via JavaScript (AJAX request)
 document.getElementById('commuteForm').addEventListener('submit', async function(e) {
     e.preventDefault();  // Prevent default form submission
-
+    // console.log('Current User:', currentUser);  // Add this line to debug
+    const currentUser = localStorage.getItem('currentUser');
+    console.log('Current User:', currentUser); 
     // Collect the form data
     const formData = {
         username: currentUser,  // Use the username from the input field

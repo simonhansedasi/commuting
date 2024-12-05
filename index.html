@@ -100,7 +100,9 @@
   <form id="commuteForm" style="display: none;">
   <h2>Submit Your Commute Data</h2>
 
-
+    <div>
+        <span id="commuteFormUsername"></span>
+    </div>
     <div>
         <label for="start_time">Start Time:</label>
         <input type="time" id="start_time" name="start_time" required>
@@ -159,9 +161,9 @@
       <div id="dashboardContent"></div>
   </div>
 
-  <script src="js/users.js"></script>
+  <!-- <script src="js/users.js"></script> -->
   <script src="js/login.js"></script>
   <!-- <script src="js/check_usernames.js"></script> -->
-  <script src="js/commute_form.js"></script>
+  <script src="js/commute_form.js" defer></script>
 </body>
 </html>

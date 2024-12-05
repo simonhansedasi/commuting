@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     let currentUser = null;
+    console.log('Pooopyypeeedooo')
 
     const submitButton = document.getElementById('submitButton');
     const returningUserSubmit = document.getElementById('returningUserSubmit');
@@ -40,12 +41,15 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 currentUser = result.username;
                 localStorage.setItem('currentUser', currentUser);
-
-                responseMessage.innerText = `Welcome back, ${currentUser}!`;
+                console.log('Current user saved to localStorage:', currentUser);
+                console.log('Pooopyypeeedooo')
+                // responseMessage.innerText = `Welcome back, ${currentUser}!`;
 
                 // Show commute form and hide login section
                 userSection.style.display = 'none';
                 commuteForm.style.display = 'block';
+                const loginCompleteEvent = new Event('loginComplete');
+                document.dispatchEvent(loginCompleteEvent); 
             } else {
                 responseMessage.innerText = `Error: ${result.message}`;
             }
@@ -83,6 +87,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (response.ok) {
                 currentUser = result.username;
                 localStorage.setItem('currentUser', result.username);
+                console.log('Current user saved to localStorage:', currentUser);
+                console.log('Pooopyypeeedooo')
 
                 newUserPinMessage.innerText = `Your pin is: ${pin}`;
                 responseMessage.innerText = `User ${currentUser} registered successfully with pin: ${pin}`;
@@ -90,6 +96,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Show commute form and hide login section
                 userSection.style.display = 'none';
                 commuteForm.style.display = 'block';
+                const loginCompleteEvent = new Event('loginComplete');
+                document.dispatchEvent(loginCompleteEvent); 
             } else {
                 responseMessage.innerText = `Error: ${result.message}`;
             }
