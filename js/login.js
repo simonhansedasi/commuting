@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (response.ok) {
                 currentUser = result.username;
-                localStorage.setItem('currentUser', result.username);
+                localStorage.setItem('currentUser', currentUser);
 
                 responseMessage.innerText = `Welcome back, ${currentUser}!`;
 
