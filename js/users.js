@@ -16,7 +16,7 @@ verifyButton.addEventListener('click', async () => {
     try {
         if (userId) {
             // Verify existing user
-            const response = await fetch('http://127.0.0.1:5000/verify_user', {
+            const response = await fetch('https://f301-73-83-144-18.ngrok-free.app/verify_user', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ user_id: userId })
@@ -39,7 +39,7 @@ verifyButton.addEventListener('click', async () => {
             }
         } else {
             // Register a new user
-            const response = await fetch('http://127.0.0.1:5000/check_username', {
+            const response = await fetch('https://f301-73-83-144-18.ngrok-free.app/check_username', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username })

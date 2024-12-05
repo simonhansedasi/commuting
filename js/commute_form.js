@@ -57,7 +57,7 @@ document.getElementById('commuteForm').addEventListener('submit', async function
 
     try {
         // Send form data to Flask backend via POST request
-        const response = await fetch('http://127.0.0.1:5000/submit_commute', {
+        const response = await fetch('https://f301-73-83-144-18.ngrok-free.app/submit_commute', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
