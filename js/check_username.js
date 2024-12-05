@@ -4,7 +4,7 @@
         const username = document.getElementById('username').value;
 
         // Send the username to the backend for validation
-        const response = await fetch('https://f301-73-83-144-18.ngrok-free.app/check_username', {
+        const response = await fetch('https://e644-73-83-144-18.ngrok-free.app/check_username', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

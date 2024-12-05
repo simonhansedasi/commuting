@@ -12,7 +12,7 @@ document.getElementById('returningUserSubmit').addEventListener('click', async f
     }
 
     // Perform validation (e.g., check if the username and pin exist)
-    const response = await fetch('https://f301-73-83-144-18.ngrok-free.app/verify_user', {
+    const response = await fetch('https://e644-73-83-144-18.ngrok-free.app/verify_user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, pin })
@@ -50,7 +50,7 @@ document.getElementById('generatePinButton').addEventListener('click', async fun
     const pin = Math.floor(1000 + Math.random() * 9000);
 
     // Send the new user information along with the generated pin
-    const response = await fetch('https://f301-73-83-144-18.ngrok-free.app/register_user', {
+    const response = await fetch('https://e644-73-83-144-18.ngrok-free.app/register_user', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, pin, email, emailCheckbox })
