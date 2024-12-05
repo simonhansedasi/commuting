@@ -9,9 +9,11 @@ document.addEventListener('DOMContentLoaded', function () {
         // Ensure the commute form section is visible
         document.getElementById('commuteFormSection').style.display = 'block';
         document.getElementById('loginSection').style.display = 'none';
-    } else {
+    } 
+    
+    else {
         // If no user is logged in, show an alert and hide the form
-        alert('No user logged in. Please log in to access the commute form.');
+        // alert('No user logged in. Please log in to access the commute form.');
         document.getElementById('commuteFormSection').style.display = 'none';
         document.getElementById('loginSection').style.display = 'block';
     }
