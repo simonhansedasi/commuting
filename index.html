@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Commute Tracker Portal</title>
 <style>
+
+
     .dashboard {
         margin-top: 20px;
         display: none;
@@ -54,21 +56,42 @@
 <body>
   <h1>Welcome to the Commute Tracker Portal</h1>
   <p>This is an independent project to better understand commutes. Right now, it's just me and you, pal.</p>
-  <p>Questions? Email me at <a href="mailto:simonhansedasi@gmail.com">simonhansedasi@gmail.com</a></p>
+  <p>Questions? Suggestions? Email me at <a href="mailto:simonhansedasi@gmail.com">simonhansedasi@gmail.com</a></p>
   <p> <a href ="https://github.com/simonhansedasi/commuting">View on github</a></p>
 
+  <div id="userSection">
+      <h3>Enter User Details</h3>
+      <p>This is merely a measure to reduce the risk of multiple users overwriting data. Enter your username and pin if you're a returning user, or create a new username to get a pin.</p>
 
+      <!-- For Returning Users -->
+      <div id="returningUserSection">
+          <label for="returningUsernameInput">Username:</label>
+          <input type="text" id="returningUsernameInput" placeholder="Enter username"><br>
+          <label for="returningPinInput">Pin:</label>
+          <input type="text" id="returningPinInput" placeholder="Enter pin"><br>
+          <button id="returningUserSubmit">Login</button>
+      </div>
 
-<div id="userSection">
-    <h3>Enter User Details</h3>
-    <p>This is merely a measure to reduce the risk of multiple users overwriting data. Enter a desired username and have a userID generated. To keep tracking your commutes, you will need to return with your userID.</p>
-    <label for="userIdInput">UserID (if existing):</label>
-    <input type="text" id="userIdInput" placeholder="Enter your UserID">
-    <p>OR</p>
-    <label for="usernameInput">New Username:</label>
-    <input type="text" id="usernameInput" placeholder="Enter a new username">
-    <button id="verifyButton">Verify/Submit</button>
-</div>
+      <hr>
+
+      <!-- For New Users -->
+      <p>Email address is purely optional to receive your username and PIN. Recommended, as they are easily forgotten. Emails are not stored anywhere.</p>
+      <div id="newUserSection">
+          <label for="newUsernameInput">New Username:</label>
+          <input type="text" id="newUsernameInput" placeholder="Enter new username"><br>
+          <label for="emailInput">Email (optional):</label>
+   	  <input type="email" id="emailInput" placeholder="Enter your email"><br>
+    <input type="checkbox" id="emailCheckbox">
+    <label for="emailCheckbox">Email me my PIN and username</label><br>
+
+          <button id="generatePinButton">Generate Pin</button>
+          <p id="newUserPinMessage"></p>
+      </div>
+  </div>
+
+  <div id="responseMessage"></div>
+  <div id="resultContainer"></div>
+
 
 
 <div id="responseMessage"></div>
@@ -137,7 +160,8 @@
   </div>
 
   <script src="js/users.js"></script>
-  <script src="js/check_usernames.js"></script>
+  <script src="js/login.js"></script>
+  <!-- <script src="js/check_usernames.js"></script> -->
   <script src="js/commute_form.js"></script>
 </body>
 </html>

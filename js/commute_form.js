@@ -1,3 +1,25 @@
+document.addEventListener('DOMContentLoaded', function () {
+    // Retrieve the username from localStorage
+    const currentUser = localStorage.getItem('currentUser');
+
+    if (currentUser) {
+        // Display the username in the commute form
+        document.getElementById('commuteFormUsername').innerText = `Welcome, ${currentUser}!`;
+
+        // Ensure the commute form section is visible
+        document.getElementById('commuteFormSection').style.display = 'block';
+        document.getElementById('loginSection').style.display = 'none';
+    } else {
+        // If no user is logged in, show an alert and hide the form
+        alert('No user logged in. Please log in to access the commute form.');
+        document.getElementById('commuteFormSection').style.display = 'none';
+        document.getElementById('loginSection').style.display = 'block';
+    }
+});
+
+
+
+
 // Handle the transport options based on selected transport mode
 function updateTransportOptions() {
     const transportMode = document.getElementById("transport_mode").value;
@@ -24,7 +46,7 @@ document.getElementById('commuteForm').addEventListener('submit', async function
 
     // Collect the form data
     const formData = {
-        username: usernameInput.value,  // Use the username from the input field
+        username: currentUser,  // Use the username from the input field
         start_time: document.getElementById('start_time').value,
         end_time: document.getElementById('end_time').value,
         transport_mode: document.getElementById('transport_mode').value,

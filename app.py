@@ -2,14 +2,30 @@ import sqlite3
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import commute_analysis as ca
-# from flask_sqlalchemy import SQLAlchemy
+from flask_mail import Mail, Message
 import random
+from dotenv import load_dotenv
+import os
+
+
 
 
 app = Flask(__name__)
-CORS(app, resources={r"/*": {"origins": "http://127.0.0.1:4000"}})
+CORS(app, support_credentials = True, resources={r'/*': {'origins': 'http://127.0.0.1:4000'}})
+# Load environment variables from .env file
+load_dotenv()
 
+email_username = os.getenv('EMAIL_USERNAME')
+email_password = os.getenv('EMAIL_PASSWORD')
 
+app.config['MAIL_USERNAME'] = email_username
+app.config['MAIL_PASSWORD'] = email_password
+# Email configuration
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+
+mail = Mail(app)
 
 # Initialize the database and ensure the users table exists
 def init_users_db():
@@ -18,14 +34,14 @@ def init_users_db():
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             username TEXT UNIQUE,
-            user_id TEXT UNIQUE
+            pin TEXT UNIQUE
         )
     ''')
     conn.commit()
     conn.close()
     
 def init_db():
-    """Initialize the SQLite database and create a table if it doesn't exist."""
+    '''Initialize the SQLite database and create a table if it doesn't exist.'''
     with sqlite3.connect('commute_data.db') as conn:
         cursor = conn.cursor()
         cursor.execute('''
@@ -45,27 +61,49 @@ def init_db():
         
         
         
-# Generate a new user ID
-def generate_user_id(username):
-    import random
-    random_number = random.randint(100, 999)
-    return f"{username}{random_number}"
+def generate_pin():
+    return str(random.randint(1000, 9999))
 
 
 
-@app.route('/register', methods=['POST'])
+@app.route('/register_user', methods=['POST'])
 def register_user():
     data = request.json
+    print(data)
     username = data.get('username')
+    pin = data.get('pin')
+    email = data.get('email')  # Get the optional email
+    emailCheckbox = data.get('emailCheckbox')
 
     if not username:
         return jsonify({'error': 'Username is required'}), 400
 
-    result = add_or_check_user(username)
+    result = add_or_check_user(username, pin)
+    
     if result['status'] == 'exists':
-        return jsonify({'error': 'Username already exists. Please provide the correct user ID.'}), 400
-    else:
-        return jsonify({'message': 'User created successfully', 'user_id': result['user_id']}), 201
+        return jsonify({'message': 'Username already exists. Please use the correct pin.'}), 400
+
+    # If we reach here, the user was created successfully
+    response_data = {'message': 'User created successfully', 'username': username, 'pin': result['pin']}
+
+    # Send an email if the emailCheckbox is true and email is provided
+    if emailCheckbox and email:
+        # print('poopy')
+        try:
+            msg = Message(
+                subject='Your Commute Tracker Credentials',
+                sender=app.config['MAIL_USERNAME'],
+                recipients=[email],
+                body=f'Hello,\nHere are your credentials for the Commute Tracker Portal.\n\nUsername: {username},\nPin: {pin}\n\nHappy tracking!\n'
+            )
+            mail.send(msg)
+            response_data['email_status'] = 'Email sent successfully'
+        except Exception as e:
+            response_data['email_status'] = f'Failed to send email: {str(e)}'
+        # print(response_data['email_status'])
+
+    return jsonify(response_data), 201
+
 
 
 
@@ -77,56 +115,60 @@ def index():
 @app.route('/verify_user', methods=['POST'])
 def verify_user():
     data = request.json
-    user_id = data.get('user_id')
+    username = data.get('username')
+    pin = data.get('pin')
+    print(username)
+    print(pin)
+    if not username or not pin:
+        return jsonify({'error': 'Username and pin are required'}), 400
 
-    if not user_id:
-        return jsonify({'error': 'UserID is required'}), 400
-
-    # Check if the userID exists in the database
+    # Check if the username exists and the pin matches
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
-    cursor.execute('SELECT username FROM users WHERE user_id = ?', (user_id,))
+    cursor.execute('SELECT pin FROM users WHERE username = ?', (username,))
     result = cursor.fetchone()
     conn.close()
-
-    if result:
-        return jsonify({'message': 'User verified', 'username': result[0]}), 200
+    print(result)
+    if result and result[0] == pin:
+        return jsonify({'message': 'User verified successfully', 'username': username}), 200
     else:
-        return jsonify({'message': 'Invalid UserID. Please check or register again.'}), 400
+        return jsonify({'error': 'Invalid username or pin'}), 400
+
 
 
 # Add or check a user in the database
-def check_or_add_user(username):
+def add_or_check_user(username, pin):
     conn = sqlite3.connect('users.db')
     cursor = conn.cursor()
 
-    # Check if the username exists
-    cursor.execute('SELECT user_id FROM users WHERE username = ?', (username,))
+    # Check if the username already exists
+    cursor.execute('SELECT pin FROM users WHERE username = ?', (username,))
     result = cursor.fetchone()
 
     if result:
-        # Username exists, return an error
-        conn.close()
-        return {'status': 'exists', 'message': 'Username already taken. Please choose another one.'}, 400
-    else:
-        # Generate a new user ID
-        new_user_id = f"{username}{random.randint(100, 999)}"
-        cursor.execute('INSERT INTO users (username, user_id) VALUES (?, ?)', (username, new_user_id))
-        conn.commit()
-        conn.close()
-        print(new_user_id)
-        return {'status': 'created', 'user_id': new_user_id}, 200
+        # If the username exists, return the pin
+        return {'status': 'exists', 'pin': result[0]}
+    
+    # If the username doesn't exist, create a new user with a generated pin
+    # pin = generate_pin()
+    cursor.execute('INSERT INTO users (username, pin) VALUES (?, ?)', (username, pin))
+    conn.commit()
+
+    conn.close()
+    
+    return {'status': 'created', 'pin': pin}
     
     
 @app.route('/check_username', methods=['POST'])
 def check_username():
     data = request.json
     username = data.get('username')
+    pint = data.get('pin')
 
     if not username:
         return jsonify({'error': 'Username is required'}), 400
 
-    result, status_code = check_or_add_user(username)
+    result, status_code = check_or_add_user(username, pin)
     print(result)
     return jsonify(result), status_code
     
