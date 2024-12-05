@@ -5,18 +5,18 @@ document.addEventListener('DOMContentLoaded', function () {
     const loginSection = document.getElementById('loginSection');
     const commuteFormUsername = document.getElementById('commuteFormUsername');
 
-    if (currentUser) {
-        if (commuteFormUsername) {
-            commuteFormUsername.innerText = `Welcome, ${currentUser}!`;
-        }
+//     if (currentUser) {
+//         if (commuteFormUsername) {
+//             commuteFormUsername.innerText = `Welcome, ${currentUser}!`;
+//         }
 
-        if (commuteFormSection) commuteFormSection.style.display = 'block';
-        if (loginSection) loginSection.style.display = 'none';
-    } else {
-        alert('No user logged in. Please log in to access the commute form.');
-        if (commuteFormSection) commuteFormSection.style.display = 'none';
-        if (loginSection) loginSection.style.display = 'block';
-    }
+//         if (commuteFormSection) commuteFormSection.style.display = 'block';
+//         if (loginSection) loginSection.style.display = 'none';
+//     } else {
+//         alert('No user logged in. Please log in to access the commute form.');
+//         if (commuteFormSection) commuteFormSection.style.display = 'none';
+//         if (loginSection) loginSection.style.display = 'block';
+//     }
 
     // Transport options update
     const transportMode = document.getElementById("transport_mode");
