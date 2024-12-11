@@ -11,7 +11,7 @@ import os
 
 
 app = Flask(__name__)
-CORS(app, support_credentials = True, resources={r'/*': {'origins': ['http://127.0.0.1:4000', 'https://e644-73-83-144-18.ngrok-free.app','https://simonhansedasi.github.io']}})
+CORS(app, support_credentials = True, resources={r'/*': {'origins': ['http://127.0.0.1:4000', 'https://92cc-73-83-144-18.ngrok-free.app','https://simonhansedasi.github.io']}})
 # Load environment variables from .env file
 load_dotenv()
 
@@ -247,4 +247,4 @@ if __name__ == '__main__':
     init_db()
     init_users_db()
 
-    app.run(debug=True)
+    app.run(port = 5003)
