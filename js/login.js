@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const pin = Math.floor(1000 + Math.random() * 9000); // Generate a random 4-digit pin
 
         try {
-            const response = await fetch('https://92cc-73-83-144-18.ngrok-free.app/register_user', {
+            const response = await fetch('https://92b9-73-83-144-18.ngrok-free.app/register_user', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, pin, email, emailCheckbox }),
