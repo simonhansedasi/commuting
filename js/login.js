@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch('https://92cc-73-83-144-18.ngrok-free.app/verify_user', {
+            const response = await fetch('https://92b9-73-83-144-18.ngrok-free.app/verify_user', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, pin }),
