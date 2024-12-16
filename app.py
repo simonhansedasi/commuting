@@ -1,5 +1,5 @@
 import sqlite3
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, redirect
 from flask_cors import CORS
 import commute_analysis as ca
 from flask_mail import Mail, Message
@@ -112,6 +112,31 @@ def register_user():
 def index():
     return render_template('index.html') 
 
+
+@app.route('/generate_images', methods=['POST'])
+def generate_images():
+    # Simulate image generation and saving them to static/images
+    image_paths = [
+        'static/images/comb_data.png',
+        'static/images/with_rain.png',
+        'static/images/no_rain.png'
+    ]
+    # Normally here, you'd generate and save images, like:
+    # image.save(image_paths[0])
+    
+    # Return the list of image filenames for the frontend to use
+    return jsonify({
+        'images': ['comb_data.png', 'with_rain.png', 'no_rain.png']
+    })
+
+    
+    
+@app.route('/static/images/<filename>')
+def serve_image(filename):
+    return send_from_directory('static/images', filename)
+
+
+
 @app.route('/verify_user', methods=['POST'])
 def verify_user():
     data = request.json
@@ -217,8 +242,10 @@ def submit_commute():
             
         # df = ca.get_data_from_db(username = username)
         with_rain, no_rain = ca.analyze_commute_data(username)
-        rain_chart_path, no_rain_chart_path = ca.plot_pie(user = username)
-        print(username, start_time, end_time, transport_mode, freeway, lane, raining, with_rain, no_rain, rain_chart_path, no_rain_chart_path)
+        print(username, start_time, end_time, transport_mode, freeway, lane, raining, with_rain, no_rain)  
+        
+        ca.make_charts()
+
         return (jsonify({
             'username':username,
             'start_time': start_time,
@@ -228,20 +255,20 @@ def submit_commute():
             'lane': lane,
             'raining': raining,
             'with_rain':with_rain,
-            'no_rain': no_rain,
-            'with_rain_chart': rain_chart_path,
-            'no_rain_chart': no_rain_chart_path       
+            'no_rain': no_rain,    
         }))
 
     except Exception as e:
         # If an error occurs, return a 400 status with the error message
         return jsonify({'error': str(e)}), 400
-    
-    
 
-    
-    
-    
+
+
+
+
+
+
+
 
 if __name__ == '__main__':
     init_db()

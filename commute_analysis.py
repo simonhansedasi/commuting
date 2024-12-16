@@ -38,6 +38,16 @@ def calculate_CIs(data):
 def time_to_seconds(time_obj):
     return time_obj.hour * 3600 + time_obj.minute * 60 + time_obj.second
 
+def get_usernames(db_file = 'users.db'):
+    conn = sqlite3.connect(db_file)
+    query = '''select * from sqlite_master where type = 'table';'''
+    data = pd.read_sql_query(f'''select * from users;''', conn)
+    conn.close()
+    return data
+
+
+
+
 
 def get_data_from_db(username = 'she',db_file = 'commute_data.db'):
     # Your logic to connect to the database, fetch data, and return the dataframe
@@ -141,7 +151,107 @@ def plot_pie(user):
     return f'/static/images/{user}_pie_with_rain.png', f'/static/images/{user}_pie_no_rain.png'
 
 
+def count_time(data, combined = False, raining = 0):
+    tot_time_dict = {}
+    avg_time_dict = {}
+    if combined == False:
+        for trans in data.transport_mode.unique():
+            df = data[
+                (data.transport_mode == trans) &
+                (data.raining == raining)
+            ]
+            
+            if df.empty:
+                continue
+            tot_time_length = np.round(sum(df.commute_duration_seconds) / 60 / 60, 1)
+            avg_time_length = np.round((sum(df.commute_duration_seconds) / len(df)) / 60 / 60, 1)
+            # print(f'''{trans} total, {tot_time_length} hours''')
+            # print(f'''{trans} avg, {avg_time_length} hours''')
+            tot_time_dict[trans] = tot_time_length
+            avg_time_dict[trans] = avg_time_length
+        return tot_time_dict, avg_time_dict
+    
+    
+    
+    
+    
+    
+    elif combined == True:
+        for trans in data.transport_mode.unique():
+            df = data[
+                (data.transport_mode == trans)
+                # (data.raining == raining)
+            ]
+            if df.empty:
+                continue
+            tot_time_length = np.round(sum(df.commute_duration_seconds) / 60 / 60, 1)
+            avg_time_length = np.round((sum(df.commute_duration_seconds) / len(df)) / 60 / 60, 1)
+            # print(f'''{trans} total, {tot_time_length} hours''')
+            # print(f'''{trans} avg, {avg_time_length} hours''')
+            tot_time_dict[trans] = tot_time_length
+            avg_time_dict[trans] = avg_time_length
+        return tot_time_dict, avg_time_dict
 
 
 
+def make_charts():
+    
+    users = get_usernames()
+
+    data = pd.DataFrame()
+    static_dir = os.path.join('static', 'images')
+
+    for user in users.username:
+        data = pd.concat([data,get_data_from_db(username = user)], axis = 0)
+        
+    comb_tot, comb_avg = count_time(data, True)
+
+    nr_tot, nr_avg = count_time(data, False, 0)
+
+    wr_tot, wr_avg = count_time(data, False, 1)
+    
+    for [dict1, dict2] in [[comb_tot, comb_avg], [nr_tot, nr_avg], [wr_tot, wr_avg]]:
+    
+    
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 8))
+
+
+        ax1.pie(
+            dict1.values(),
+            labels=[f"{label}\n{value}h" for label, value in dict1.items()],
+            autopct='%1.1f%%',
+            startangle=90,
+        )
+        ax2.pie(
+            dict2.values(),
+            labels=[f"{label}\n{value}h" for label, value in dict2.items()],
+            autopct='%1.1f%%',
+            startangle=90,
+        )
+        if dict1 == comb_tot:        
+            ax1.set_title("Total Time in Transit")
+            ax2.set_title("Avg Time in Transit")
+            
+            pth1 = os.path.join(static_dir, f'comb_data.png')
+            plt.savefig(pth1, bbox_inches='tight')
+            plt.close(fig)  
+            
+        if dict1 == nr_tot:        
+            ax1.set_title("Total Time in Transit (No Rain)")
+            ax2.set_title("Avg Time in Transit (No Rain)")
+            pth2 = os.path.join(static_dir, f'no_rain.png')
+            plt.savefig(pth2, bbox_inches='tight')
+            plt.close(fig) 
+            
+            
+            
+        if dict1 == wr_tot:        
+            ax1.set_title("Total Time in Transit (With Rain)")
+            ax2.set_title("Avg Time in Transit (With Rain)")
+            pth3 = os.path.join(static_dir, f'with_rain.png')
+            plt.savefig(pth3, bbox_inches='tight')
+            plt.close(fig) 
+    return pth1, pth2, pth3
+
+        # plt.show()
 
