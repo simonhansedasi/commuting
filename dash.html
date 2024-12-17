@@ -19,7 +19,7 @@ h2{
 
     .dashboard {
         margin-top: 20px;
-        display: none;
+        display: block;
         clear: both;  /* Ensures elements below the dashboard are properly aligned */
         text-align: center;  /* Centers the content of the dashboard */
     }
@@ -68,83 +68,48 @@ h2{
   <p>This is an independent project to better understand commutes. Right now, it's just me and you, pal.</p>
   <p>Questions? Suggestions? Email me at <a href="mailto:simonhansedasi@gmail.com">simonhansedasi@gmail.com</a></p>
   <p> <a href ="https://github.com/simonhansedasi/commuting">View on github</a></p>
-
-<h2>All Users</h2>
-<img src="static/images/comb_data.png" alt="Dashboard Image"><br><br>
-<img src="static/images/with_rain.png" alt="Image"><br><br>
-<img src="static/images/no_rain.png" alt="ssss Image"><br><br>
-<div class="dashboard">
     
+    <p>test text</p>
+<div class='dashboard'><h2>All Users</h2>
 </div>
 
+<!-- <img src="static/images/comb_data.png" alt="All Data"><br><br>
+<img src="static/images/with_rain.png" alt="With Rain"><br><br>
+<img src="static/images/no_rain.png" alt="No Rain"><br><br> -->
+<!-- <div class="dashboard"> -->
     
+
+ 
     
       <script>
-    fetch("https://d3a5-73-83-144-18.ngrok-free.app/get_images", {
-  method: 'GET',
-  headers: {
-    'ngrok-skip-browser-warning': 'true', 
-    'Content-Type': 'application/json'
+          
+          fetch("https://148a9d794a82.ngrok.app/get_images", {
+    method: 'GET',
+    headers: {
+        'ngrok-skip-browser-warning': 'true',
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
 
-  }
-  })
-        .then(response => response.text())  // Use .text() first to inspect the raw response
-        .then(text => {
-            console.log("Raw response body:", text);  // Log raw response body
-            return JSON.parse(text);  // Manually parse the response body as JSON
-        })
-        .then(data => {
-            console.log("Parsed JSON:", data);  // Log parsed JSON
-            // Update the page with the image URLs
-            const dashboardDiv = document.querySelector('.dashboard');
-            data.images.forEach(imgUrl => {
-                let img = document.createElement('img');
-                img.src = imgUrl;
-                dashboardDiv.appendChild(img);  // Append the image to the page
-            });
-        })
-        .catch(error => {
-            console.error("Error fetching images:", error);
-        });
+    }
+})
+.then(response => response.json())  // Directly parse JSON
+.then(data => {
+    console.log("Parsed JSON:", data);  // Log the data to ensure it's correct
+    const dashboardDiv = document.querySelector('.dashboard');
+    data.images.forEach(imgUrl => {
+        console.log("Appending image:", imgUrl);  // Log the image URL
+        let img = document.createElement('img');
+        img.src = imgUrl;
+        dashboardDiv.appendChild(img);  // Append the image to the page
+    });
+})
+.catch(error => {
+    console.error("Error fetching images:", error);
+});
+
   </script>
 
-    
-<!--     
-// <script>
-//     document.addEventListener("DOMContentLoaded", () => {
-//         console.log("Fetching images...");
 
-//         fetch("https://eaaa-73-83-144-18.ngrok-free.app/get_images")
-//             .then(response => {
-//                 if (!response.ok) {
-//                     throw new Error(`HTTP error! status: ${response.status}`);
-//                 }
-//                 console.log("Response received:", response);
-//                 return response.json(); // Ensure JSON parsing
-//             })
-//             .then(data => {
-//                 console.log("Data fetched:", data);
-//                 const imagesContainer = document.querySelector(".dashboard");
-//                 data.images.forEach(imageUrl => {
-//                     const img = document.createElement("img");
-//                     img.src = imageUrl;
-//                     img.alt = "Dynamic image";
-//                     img.style.margin = "10px";
-//                     imagesContainer.appendChild(img);
-//                 });
-//             })
-//             .catch(error => {
-//                 console.error("Error fetching images:", error);
-//             });
-//     });
-// </script>
- -->
-
-
-
-
-</body>
-</html>
 
 </body>
 </html>

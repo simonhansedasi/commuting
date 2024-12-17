@@ -1,5 +1,5 @@
 import sqlite3
-from flask import Flask, request, jsonify, redirect, url_for
+from flask import Flask, request, jsonify, redirect, url_for, send_from_directory
 from flask_cors import CORS
 import commute_analysis as ca
 from flask_mail import Mail, Message
@@ -11,7 +11,7 @@ import os
 
 
 app = Flask(__name__)
-CORS(app, support_credentials = True, resources={r'/*': {'origins': ['http://127.0.0.1:4000', 'https://d3a5-73-83-144-18.ngrok-free.app','https://simonhansedasi.github.io']}})
+CORS(app, support_credentials = True, resources={r'/*': {'origins': ['*']}})
 # Load environment variables from .env file
 load_dotenv()
 
@@ -27,6 +27,13 @@ app.config['MAIL_USE_TLS'] = True
 
 mail = Mail(app)
 
+
+@app.before_request
+def before_request():
+    if request.scheme == 'http':
+        return redirect(request.url.replace('http://', 'https://', 1))
+    
+    
 # Initialize the database and ensure the users table exists
 def init_users_db():
     conn = sqlite3.connect('users.db')
@@ -115,7 +122,7 @@ def index():
 
 @app.route('/get_images', methods=['GET'])
 def get_images():
-    base_url = 'https://d3a5-73-83-144-18.ngrok-free.app'
+    base_url = 'https://148a9d794a82.ngrok.app'
     # base_url = request.host_url  # Get the full base URL (e.g., http://127.0.0.1:5000/)
     images = [
         base_url + '/static/images/comb_data.png',
@@ -125,8 +132,8 @@ def get_images():
     return jsonify({"images": images})
     
 @app.route('/static/images/<filename>')
-def serve_image(filename):
-    return send_from_directory('static/images', filename)
+def serve_static(filename):
+    return send_from_directory(os.path.join(app.root_path,'static','images'), filename)
 
 
 

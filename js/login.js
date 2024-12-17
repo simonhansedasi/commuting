@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch('https://d3a5-73-83-144-18.ngrok-free.app/verify_user', {
+            const response = await fetch('https://148a9d794a82.ngrok.app/verify_user', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, pin }),
@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const pin = Math.floor(1000 + Math.random() * 9000); // Generate a random 4-digit pin
 
         try {
-            const response = await fetch('https://d3a5-73-83-144-18.ngrok-free.app/register_user', {
+            const response = await fetch('https://148a9d794a82.ngrok.app/register_user', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username, pin, email, emailCheckbox }),
