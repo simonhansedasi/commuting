@@ -11,7 +11,7 @@ import os
 
 
 app = Flask(__name__)
-CORS(app, support_credentials = True, resources={r'/*': {'origins': ['http://127.0.0.1:4000', 'https://92cc-73-83-144-18.ngrok-free.app','https://simonhansedasi.github.io']}})
+CORS(app, support_credentials = True, resources={r'/*': {'origins': ['http://127.0.0.1:4000', 'https://d3a5-73-83-144-18.ngrok-free.app','https://simonhansedasi.github.io']}})
 # Load environment variables from .env file
 load_dotenv()
 
@@ -115,14 +115,14 @@ def index():
 
 @app.route('/get_images', methods=['GET'])
 def get_images():
-    # Paths to images dynamically served
+    base_url = 'https://d3a5-73-83-144-18.ngrok-free.app'
+    # base_url = request.host_url  # Get the full base URL (e.g., http://127.0.0.1:5000/)
     images = [
-        url_for('static', filename='images/comb_data.png'),
-        url_for('static', filename='images/with_rain.png'),
-        url_for('static', filename='images/no_rain.png'),
+        base_url + '/static/images/comb_data.png',
+        base_url + '/static/images/with_rain.png',
+        base_url + '/static/images/no_rain.png',
     ]
     return jsonify({"images": images})
-    
     
 @app.route('/static/images/<filename>')
 def serve_image(filename):
