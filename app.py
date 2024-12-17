@@ -130,6 +130,21 @@ def get_images():
         base_url + '/static/images/no_rain.png',
     ]
     return jsonify({"images": images})
+
+
+
+@app.route('/get_user_images', methods=['GET'])
+def get_user_images():
+    base_url = 'https://148a9d794a82.ngrok.app'
+    username = request.args.get('username')  
+
+    # base_url = request.host_url  # Get the full base URL (e.g., http://127.0.0.1:5000/)
+    images = [
+        base_url + f'/static/images/{username}_comb_data.png',
+        base_url + f'/static/images/{username}_with_rain.png',
+        base_url + f'/static/images/{username}_no_rain.png',
+    ]
+    return jsonify({"images": images})
     
 @app.route('/static/images/<filename>')
 def serve_static(filename):
@@ -242,10 +257,11 @@ def submit_commute():
             
         # df = ca.get_data_from_db(username = username)
         with_rain, no_rain = ca.analyze_commute_data(username)
-        print(username, start_time, end_time, transport_mode, freeway, lane, raining, with_rain, no_rain)  
-        
+        # print(username, start_time, end_time, transport_mode, freeway, lane, raining, with_rain, no_rain)  
+        print('making charts')
         ca.make_charts()
-
+        print('making user charts')
+        ca.make_user_charts(username)
         return (jsonify({
             'username':username,
             'start_time': start_time,

@@ -163,8 +163,8 @@ def count_time(data, combined = False, raining = 0):
             
             if df.empty:
                 continue
-            tot_time_length = np.round(sum(df.commute_duration_seconds) / 60 / 60, 1)
-            avg_time_length = np.round((sum(df.commute_duration_seconds) / len(df)) / 60 / 60, 1)
+            tot_time_length = np.round(sum(df.commute_duration_seconds) / 60, 1)
+            avg_time_length = np.round(((sum(df.commute_duration_seconds)/ 60) / len(df)) , 1)
             # print(f'''{trans} total, {tot_time_length} hours''')
             # print(f'''{trans} avg, {avg_time_length} hours''')
             tot_time_dict[trans] = tot_time_length
@@ -184,8 +184,8 @@ def count_time(data, combined = False, raining = 0):
             ]
             if df.empty:
                 continue
-            tot_time_length = np.round(sum(df.commute_duration_seconds) / 60 / 60, 1)
-            avg_time_length = np.round((sum(df.commute_duration_seconds) / len(df)) / 60 / 60, 1)
+            tot_time_length = np.round(sum(df.commute_duration_seconds) / 60, 1)
+            avg_time_length = np.round(((sum(df.commute_duration_seconds) / 60 )/ len(df)) , 1)
             # print(f'''{trans} total, {tot_time_length} hours''')
             # print(f'''{trans} avg, {avg_time_length} hours''')
             tot_time_dict[trans] = tot_time_length
@@ -209,22 +209,23 @@ def make_charts():
     nr_tot, nr_avg = count_time(data, False, 0)
 
     wr_tot, wr_avg = count_time(data, False, 1)
-    
+    # if not comb_tot or comb_avg:
+    #     return
     for [dict1, dict2] in [[comb_tot, comb_avg], [nr_tot, nr_avg], [wr_tot, wr_avg]]:
     
     
-        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 8))
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 6))
 
 
         ax1.pie(
             dict1.values(),
-            labels=[f"{label}\n{value}h" for label, value in dict1.items()],
+            labels=[f"{label}\n{np.round(value/60, 1)}h" for label, value in dict1.items()],
             autopct='%1.1f%%',
             startangle=90,
         )
         ax2.pie(
             dict2.values(),
-            labels=[f"{label}\n{value}h" for label, value in dict2.items()],
+            labels=[f"{label}\n{np.round(value/60, 1)}h" for label, value in dict2.items()],
             autopct='%1.1f%%',
             startangle=90,
         )
@@ -253,5 +254,69 @@ def make_charts():
             plt.close(fig) 
     return pth1, pth2, pth3
 
+
+
+def make_user_charts(username):
+    data = get_data_from_db(username)
+    comb_tot, comb_avg = count_time(data, True)
+    nr_tot, nr_avg = count_time(data, False, 0)
+    wr_tot, wr_avg = count_time(data, False, 1)
+    # print(comb_tot, comb_avg)
+    # print(nr_tot, nr_avg)
+    # print(wr_tot, wr_avg)
+    static_dir = os.path.join('static', 'images')
+    pth2 = os.path.join(static_dir, f'{username}_no_rain.png')
+    pth3 = os.path.join(static_dir, f'{username}_with_rain.png')
+    pth1 = os.path.join(static_dir, f'{username}_comb_data.png')
+
+    print([[comb_tot, comb_avg], [nr_tot, nr_avg], [wr_tot, wr_avg]])
+    for [dict1, dict2] in [[comb_tot, comb_avg], [nr_tot, nr_avg], [wr_tot, wr_avg]]:
+        # print('poopnobblers')
+        print(dict1, dict2)
+        if not dict1 or not dict2:
+            print(f"Skipping empty data: {dict1} or {dict2}")
+            continue
+        # print('poopnobblerslectricbugalloo')
+
+        fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 6))
+        # print('fig created')
+        # print('ax1 starting')
+        ax1.pie(
+            dict1.values(),
+            labels=[f"{label}\n{np.round(value/60, 1)}h" for label, value in dict1.items()],
+            autopct='%1.1f%%',
+            startangle=90,
+        )
+        # print('ax1done')
+        ax2.pie(
+            dict2.values(),
+            labels=[f"{label}\n{np.round(value/60, 1)}h" for label, value in dict2.items()],
+            autopct='%1.1f%%',
+            startangle=90,
+        )
+        # print('ax2done')
+
+        if dict1 == comb_tot:        
+            ax1.set_title("Total Time in Transit")
+            ax2.set_title("Avg Time in Transit")
+
+            plt.savefig(pth1, bbox_inches='tight')
+            plt.close(fig)  
+
+        if dict1 == nr_tot:        
+            ax1.set_title("Total Time in Transit (No Rain)")
+            ax2.set_title("Avg Time in Transit (No Rain)")
+            plt.savefig(pth2, bbox_inches='tight')
+            plt.close(fig) 
+
+
+
+        if dict1 == wr_tot:        
+            ax1.set_title("Total Time in Transit (With Rain)")
+            ax2.set_title("Avg Time in Transit (With Rain)")
+            plt.savefig(pth3, bbox_inches='tight')
+            plt.close(fig) 
+            
+    return pth1, pth2, pth3
         # plt.show()
 

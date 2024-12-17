@@ -69,8 +69,10 @@ h2{
   <p>Questions? Suggestions? Email me at <a href="mailto:simonhansedasi@gmail.com">simonhansedasi@gmail.com</a></p>
   <p> <a href ="https://github.com/simonhansedasi/commuting">View on github</a></p>
     
-    <p>test text</p>
-<div class='dashboard'><h2>All Users</h2>
+<div class='user'><h2>My Data</h2>
+</div>
+    
+<div class='all_users'><h2>All Users</h2>
 </div>
 
 <!-- <img src="static/images/comb_data.png" alt="All Data"><br><br>
@@ -81,7 +83,40 @@ h2{
 
  
     
-      <script>
+<script>
+    const username = localStorage.getItem("currentUser");
+    console.log('username = ' + username)
+    console.log('pooooopybuttholes')
+    if (username) {
+
+
+          fetch(`https://148a9d794a82.ngrok.app/get_user_images?username=${username}`, {
+    method: 'GET',
+    headers: {
+        'ngrok-skip-browser-warning': 'true',
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+
+    }
+})
+.then(response => response.json())  // Directly parse JSON
+.then(data => {
+    console.log("Parsed JSON:", data);  // Log the data to ensure it's correct
+    const dashboardDiv = document.querySelector('.user');
+    data.images.forEach(imgUrl => {
+        console.log("Appending image:", imgUrl);  // Log the image URL
+        let img = document.createElement('img');
+        img.src = imgUrl;
+        dashboardDiv.appendChild(img);  // Append the image to the page
+    });
+})
+.catch(error => {
+    console.error("Error fetching images:", error);
+});
+    }
+  </script>
+    
+<script>
           
           fetch("https://148a9d794a82.ngrok.app/get_images", {
     method: 'GET',
@@ -95,7 +130,7 @@ h2{
 .then(response => response.json())  // Directly parse JSON
 .then(data => {
     console.log("Parsed JSON:", data);  // Log the data to ensure it's correct
-    const dashboardDiv = document.querySelector('.dashboard');
+    const dashboardDiv = document.querySelector('.all_users');
     data.images.forEach(imgUrl => {
         console.log("Appending image:", imgUrl);  // Log the image URL
         let img = document.createElement('img');
@@ -106,7 +141,6 @@ h2{
 .catch(error => {
     console.error("Error fetching images:", error);
 });
-
   </script>
 
 
