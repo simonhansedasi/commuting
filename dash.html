@@ -75,7 +75,26 @@ h2{
 <img src="static/images/no_rain.png" alt="ssss Image"><br><br>
 <div class="dashboard">
 
-
+<script>
+    // Fetch the images from the Flask app
+    fetch('https://eaaa-73-83-144-18.ngrok-free.app/get_images')
+        .then(response => response.json())
+        .then(data => {
+            const imageContainer = document.querySelector('.dashboard');
+            imageContainer.style.display = 'block'; // Show the dashboard
+            
+            data.images.forEach(imageUrl => {
+                const img = document.createElement('img');
+                img.src = imageUrl;
+                img.alt = 'Dynamic Image';
+                img.style.margin = '10px auto';
+                img.style.display = 'block'; // Center the images
+                img.style.maxWidth = '80%';  // Make them responsive
+                imageContainer.appendChild(img);
+            });
+        })
+        .catch(error => console.error('Error fetching images:', error));
+</script>
 
 
 </div>

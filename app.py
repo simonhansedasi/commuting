@@ -113,22 +113,15 @@ def index():
     return render_template('index.html') 
 
 
-@app.route('/generate_images', methods=['POST'])
-def generate_images():
-    # Simulate image generation and saving them to static/images
-    image_paths = [
-        'static/images/comb_data.png',
-        'static/images/with_rain.png',
-        'static/images/no_rain.png'
+@app.route('/get_images', methods=['GET'])
+def get_images():
+    # Paths to images dynamically served
+    images = [
+        url_for('static', filename='images/comb_data.png'),
+        url_for('static', filename='images/with_rain.png'),
+        url_for('static', filename='images/no_rain.png'),
     ]
-    # Normally here, you'd generate and save images, like:
-    # image.save(image_paths[0])
-    
-    # Return the list of image filenames for the frontend to use
-    return jsonify({
-        'images': ['comb_data.png', 'with_rain.png', 'no_rain.png']
-    })
-
+    return jsonify({"images": images})
     
     
 @app.route('/static/images/<filename>')
