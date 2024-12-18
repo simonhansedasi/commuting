@@ -122,7 +122,7 @@ def index():
 
 @app.route('/get_images', methods=['GET'])
 def get_images():
-    base_url = 'https://148a9d794a82.ngrok.app'
+    base_url = 'https://7f73a1a9963e.ngrok.app'
     # base_url = request.host_url  # Get the full base URL (e.g., http://127.0.0.1:5000/)
     images = [
         base_url + '/static/images/comb_data.png',
@@ -135,7 +135,7 @@ def get_images():
 
 @app.route('/get_user_images', methods=['GET'])
 def get_user_images():
-    base_url = 'https://148a9d794a82.ngrok.app'
+    base_url = 'https://7f73a1a9963e.ngrok.app'
     username = request.args.get('username')  
 
     # base_url = request.host_url  # Get the full base URL (e.g., http://127.0.0.1:5000/)
