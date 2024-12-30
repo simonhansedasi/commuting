@@ -1,26 +1,29 @@
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     let currentUser = null;
-    console.log('Pooopyypeeedooo')
 
-    const submitButton = document.getElementById('submitButton');
-    const returningUserSubmit = document.getElementById('returningUserSubmit');
-    const generatePinButton = document.getElementById('generatePinButton');
-    const responseMessage = document.getElementById('responseMessage');
-    const commuteForm = document.getElementById('commuteForm');
-    const userSection = document.getElementById('userSection');
-    const newUserPinMessage = document.getElementById('newUserPinMessage');
+    const elements = {
+        submitButton: document.getElementById('submitButton'),
+        returningUserSubmit: document.getElementById('returningUserSubmit'),
+        generatePinButton: document.getElementById('generatePinButton'),
+        responseMessage: document.getElementById('responseMessage'),
+        commuteForm: document.getElementById('commuteForm'),
+        userSection: document.getElementById('userSection'),
+        newUserPinMessage: document.getElementById('newUserPinMessage')
+    };
 
-    if (!returningUserSubmit || !generatePinButton || !responseMessage || !commuteForm || !userSection) {
+    if (Object.values(elements).some(el => !el)) {
         console.error('One or more required elements are missing.');
         return;
     }
 
     // Reset visibility
-    commuteForm.style.display = 'none';
-    responseMessage.innerText = '';
-    newUserPinMessage.innerText = '';
+    elements.commuteForm.style.display = 'none';
+    elements.responseMessage.innerText = '';
+    elements.newUserPinMessage.innerText = '';
 
-    returningUserSubmit.addEventListener('click', async function () {
+    const baseUrl = await fetchBaseUrl();
+
+    elements.returningUserSubmit.addEventListener('click', async () => {
         const username = document.getElementById('returningUsernameInput').value.trim();
         const pin = document.getElementById('returningPinInput').value.trim();
 
@@ -29,37 +32,10 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        try {
-            const response = await fetch('https://2f483c7b2d16.ngrok.app/verify_user', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, pin }),
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                currentUser = result.username;
-                localStorage.setItem('currentUser', currentUser);
-                console.log('Current user saved to localStorage:', currentUser);
-                console.log('Pooopyypeeedooo')
-                // responseMessage.innerText = `Welcome back, ${currentUser}!`;
-
-                // Show commute form and hide login section
-                userSection.style.display = 'none';
-                commuteForm.style.display = 'block';
-                const loginCompleteEvent = new Event('loginComplete');
-                document.dispatchEvent(loginCompleteEvent); 
-            } else {
-                responseMessage.innerText = `Error: ${result.message}`;
-            }
-        } catch (error) {
-            console.error('Error verifying user:', error);
-            responseMessage.innerText = 'An unexpected error occurred. Please try again.';
-        }
+        await handleUserLogin(username, pin, baseUrl);
     });
 
-    generatePinButton.addEventListener('click', async function () {
+    elements.generatePinButton.addEventListener('click', async () => {
         const username = document.getElementById('newUsernameInput').value.trim();
         const emailCheckbox = document.getElementById('emailCheckbox').checked;
         const email = document.getElementById('emailInput').value.trim();
@@ -68,42 +44,85 @@ document.addEventListener('DOMContentLoaded', () => {
             alert('Please enter a username.');
             return;
         }
+
         if (emailCheckbox && !email) {
             alert('Please enter your email address to receive your username and PIN.');
             return;
         }
 
-        const pin = Math.floor(1000 + Math.random() * 9000); // Generate a random 4-digit pin
-
-        try {
-            const response = await fetch('https://2f483c7b2d16.ngrok.app/register_user', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, pin, email, emailCheckbox }),
-            });
-
-            const result = await response.json();
-
-            if (response.ok) {
-                currentUser = result.username;
-                localStorage.setItem('currentUser', result.username);
-                console.log('Current user saved to localStorage:', currentUser);
-                console.log('Pooopyypeeedooo')
-
-                newUserPinMessage.innerText = `Your pin is: ${pin}`;
-                responseMessage.innerText = `User ${currentUser} registered successfully with pin: ${pin}`;
-
-                // Show commute form and hide login section
-                userSection.style.display = 'none';
-                commuteForm.style.display = 'block';
-                const loginCompleteEvent = new Event('loginComplete');
-                document.dispatchEvent(loginCompleteEvent); 
-            } else {
-                responseMessage.innerText = `Error: ${result.message}`;
-            }
-        } catch (error) {
-            console.error('Error registering user:', error);
-            responseMessage.innerText = 'An unexpected error occurred. Please try again.';
-        }
+        const pin = Math.floor(1000 + Math.random() * 9000);
+        await handleUserRegistration(username, pin, email, emailCheckbox, baseUrl);
     });
 });
+
+// Fetch base URL from config.txt
+async function fetchBaseUrl() {
+    try {
+        const response = await fetch('config.txt');
+        if (!response.ok) throw new Error('Failed to fetch config.txt');
+        return response.text().then(url => url.trim());
+    } catch (error) {
+        console.error('Error fetching base URL:', error);
+        alert('Failed to fetch base URL. Please contact support.');
+        throw error;
+    }
+}
+
+async function handleUserLogin(username, pin, baseUrl) {
+    const responseMessage = document.getElementById('responseMessage');
+    const userSection = document.getElementById('userSection');
+    const commuteForm = document.getElementById('commuteForm');
+
+    try {
+        const response = await fetch(`${baseUrl}/verify_user`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, pin })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            localStorage.setItem('currentUser', result.username);
+            userSection.style.display = 'none';
+            commuteForm.style.display = 'block';
+            document.dispatchEvent(new Event('loginComplete'));
+        } else {
+            responseMessage.innerText = `Error: ${result.message}`;
+        }
+    } catch (error) {
+        console.error('Error verifying user:', error);
+        responseMessage.innerText = 'An unexpected error occurred. Please try again.';
+    }
+}
+
+async function handleUserRegistration(username, pin, email, emailCheckbox, baseUrl) {
+    const newUserPinMessage = document.getElementById('newUserPinMessage');
+    const responseMessage = document.getElementById('responseMessage');
+    const userSection = document.getElementById('userSection');
+    const commuteForm = document.getElementById('commuteForm');
+
+    try {
+        const response = await fetch(`${baseUrl}/register_user`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username, pin, email, emailCheckbox })
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+            localStorage.setItem('currentUser', result.username);
+            newUserPinMessage.innerText = `Your pin is: ${pin}`;
+            responseMessage.innerText = `User ${result.username} registered successfully.`;
+            userSection.style.display = 'none';
+            commuteForm.style.display = 'block';
+            document.dispatchEvent(new Event('loginComplete'));
+        } else {
+            responseMessage.innerText = `Error: ${result.message}`;
+        }
+    } catch (error) {
+        console.error('Error registering user:', error);
+        responseMessage.innerText = 'An unexpected error occurred. Please try again.';
+    }
+}
