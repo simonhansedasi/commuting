@@ -10,7 +10,7 @@ import os
 
 def calculate_CIs(data):
     # data = df[df.transport_mode == transit]
-     
+    # print(data)
     m = data.commute_duration_seconds.mean()
     
     if len(data) == 1:
@@ -219,13 +219,13 @@ def make_charts():
 
         ax1.pie(
             dict1.values(),
-            labels=[f"{label}\n{np.round(value/60, 1)}h" for label, value in dict1.items()],
+            labels=[f"{label}\n{np.round(value, 1)}m" for label, value in dict1.items()],
             autopct='%1.1f%%',
             startangle=90,
         )
         ax2.pie(
             dict2.values(),
-            labels=[f"{label}\n{np.round(value/60, 1)}h" for label, value in dict2.items()],
+            labels=[f"{label}\n{np.round(value, 1)}m" for label, value in dict2.items()],
             autopct='%1.1f%%',
             startangle=90,
         )
@@ -269,12 +269,12 @@ def make_user_charts(username):
     pth3 = os.path.join(static_dir, f'{username}_with_rain.png')
     pth1 = os.path.join(static_dir, f'{username}_comb_data.png')
 
-    print([[comb_tot, comb_avg], [nr_tot, nr_avg], [wr_tot, wr_avg]])
+    # print([[comb_tot, comb_avg], [nr_tot, nr_avg], [wr_tot, wr_avg]])
     for [dict1, dict2] in [[comb_tot, comb_avg], [nr_tot, nr_avg], [wr_tot, wr_avg]]:
         # print('poopnobblers')
-        print(dict1, dict2)
+        # print(dict1, dict2)
         if not dict1 or not dict2:
-            print(f"Skipping empty data: {dict1} or {dict2}")
+            # print(f"Skipping empty data: {dict1} or {dict2}")
             continue
         # print('poopnobblerslectricbugalloo')
 
@@ -283,14 +283,14 @@ def make_user_charts(username):
         # print('ax1 starting')
         ax1.pie(
             dict1.values(),
-            labels=[f"{label}\n{np.round(value/60, 1)}h" for label, value in dict1.items()],
+            labels=[f"{label}\n{np.round(value, 1)}m" for label, value in dict1.items()],
             autopct='%1.1f%%',
             startangle=90,
         )
         # print('ax1done')
         ax2.pie(
             dict2.values(),
-            labels=[f"{label}\n{np.round(value/60, 1)}h" for label, value in dict2.items()],
+            labels=[f"{label}\n{np.round(value, 1)}m" for label, value in dict2.items()],
             autopct='%1.1f%%',
             startangle=90,
         )
