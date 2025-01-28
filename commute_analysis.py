@@ -83,7 +83,10 @@ def get_data_from_db(username = 'she',db_file = 'commute_data.db'):
     
     return df
     
-
+'''
+Function to calculate CI for transit times for users.
+Returns CI for a given transit type, with and without rain.
+'''
 def analyze_commute_data(user):
     df = get_data_from_db(username = user)   
     
@@ -151,6 +154,12 @@ def plot_pie(user):
     return f'/static/images/{user}_pie_with_rain.png', f'/static/images/{user}_pie_no_rain.png'
 
 
+
+'''
+Function to count the number of seconds in commutes
+Returns two dictionaries keyed by mode of transit
+Dictionary values are either total or average time spent in mode of transit
+'''
 def count_time(data, combined = False, raining = 0):
     tot_time_dict = {}
     avg_time_dict = {}
@@ -204,13 +213,12 @@ def make_charts():
     for user in users.username:
         data = pd.concat([data,get_data_from_db(username = user)], axis = 0)
         
-    comb_tot, comb_avg = count_time(data, True)
+    comb_tot, comb_avg = count_time(data, combined = True)
 
-    nr_tot, nr_avg = count_time(data, False, 0)
+    nr_tot, nr_avg = count_time(data, combined = False, raining = 0)
 
-    wr_tot, wr_avg = count_time(data, False, 1)
-    # if not comb_tot or comb_avg:
-    #     return
+    wr_tot, wr_avg = count_time(data, combined = False, raining = 1)
+
     for [dict1, dict2] in [[comb_tot, comb_avg], [nr_tot, nr_avg], [wr_tot, wr_avg]]:
     
     
@@ -258,12 +266,10 @@ def make_charts():
 
 def make_user_charts(username):
     data = get_data_from_db(username)
-    comb_tot, comb_avg = count_time(data, True)
-    nr_tot, nr_avg = count_time(data, False, 0)
-    wr_tot, wr_avg = count_time(data, False, 1)
-    # print(comb_tot, comb_avg)
-    # print(nr_tot, nr_avg)
-    # print(wr_tot, wr_avg)
+    comb_tot, comb_avg = count_time(data, combined = True)
+    nr_tot, nr_avg = count_time(data, combined = False, raining = 0)
+    wr_tot, wr_avg = count_time(data, combined = False, raining = 1)
+
     static_dir = os.path.join('static', 'images')
     pth2 = os.path.join(static_dir, f'{username}_no_rain.png')
     pth3 = os.path.join(static_dir, f'{username}_with_rain.png')
