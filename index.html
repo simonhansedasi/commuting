@@ -58,6 +58,7 @@
     <div>
         <span id="commuteFormUsername"></span>
     </div>
+      <br>
     <div>
         <label for="start_time">Start Time:</label>
         <input type="time" id="start_time" name="start_time" required>
@@ -66,6 +67,8 @@
         <label for="end_time">End Time:</label>
         <input type="time" id="end_time" name="end_time" required>
     </div>
+      <br>
+
     <div>
         <label for="transport_mode">Main Mode of Transport:</label>
         <select id="transport_mode" name="transport_mode" required onchange="updateTransportOptions()">
@@ -88,7 +91,6 @@
             <option value="freeway">Freeway</option>
         </select>
     </div>
-
     <!-- Additional options for Freeway (if freeway is selected) -->
     <div id="lane_options" style="display:none;">
         <label for="lane">Which Lane?</label>
@@ -100,11 +102,35 @@
             <option value="multi">Multi-lane</option>
         </select>
     </div>
+<br>
+<fieldset>
+    <legend>Precipitation:</legend>
 
-    <div>
-        <label for="raining">Rain?</label>
-        <input type="checkbox" id="raining" name="raining">
-    </div>
+    <input type="radio" id="clear" name="weather" value="clear">
+    <label for="clear">Clear</label>
+
+    <input type="radio" id="rain" name="weather" value="rain">
+    <label for="rain">Rain</label>
+
+    <input type="radio" id="snow" name="weather" value="snow">
+    <label for="snow">Snow</label>
+
+</fieldset>
+        <br>
+<fieldset>
+    <legend>Conditions:</legend>
+
+    <input type="radio" id="dry" name="conditions" value="dry">
+    <label for="dry">Dry</label>
+
+    <input type="radio" id="wet" name="conditions" value="wet">
+    <label for="wet">Wet</label>
+
+    <input type="radio" id="frozen" name="conditions" value="frozen">
+    <label for="frozen">Frozen</label>
+
+</fieldset>
+      <br>
     <div>
         <button type="submit" id="submitButton">Submit Commute</button>
   <h2><a href="dash.html">View Data</a></h2>

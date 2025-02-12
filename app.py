@@ -60,7 +60,8 @@ def init_db():
                 transport_mode TEXT NOT NULL,
                 freeway TEXT,
                 lane TEXT,
-                raining BOOLEAN NOT NULL,
+                weather TEXT NOT NULL,
+                conditions TEXT NOT NULL,
                 PRIMARY KEY (username, session_number)
             )
         ''')
@@ -125,9 +126,10 @@ def get_images():
     with open('config.txt', 'r') as file:
         base_url = file.read().strip()    # base_url = request.host_url  # Get the full base URL (e.g., http://127.0.0.1:5000/)
     images = [
-        base_url + '/static/images/comb_data.png',
-        base_url + '/static/images/with_rain.png',
-        base_url + '/static/images/no_rain.png',
+        base_url + '/static/images/mode_boxplot.png',
+        base_url + '/static/images/avg_stacked_bars.png',
+
+        base_url + '/static/images/stacked_bars.png',
     ]
     return jsonify({"images": images})
 
@@ -219,7 +221,7 @@ def submit_commute():
     try:
         # Parse the incoming JSON request
         data = request.get_json()  # Get the JSON data sent in the request body
-
+        print(data)
         # Ensure the required fields are in the request
         if not data or 'username' not in data or 'start_time' not in data or 'end_time' not in data or 'transport_mode' not in data:
             return jsonify({'error': 'Missing required fields'}), 400
@@ -230,9 +232,8 @@ def submit_commute():
         transport_mode = data['transport_mode']
         freeway = data.get('freeway', None)  # Optional field
         lane = data.get('lane', None)        # Optional field
-        raining = data.get('raining', False) # Optional field
-        
-        
+        precip = data.get('precipitation') # Optional field
+        conditions = data.get('conditions') # Optional field
         
         
         
@@ -249,20 +250,21 @@ def submit_commute():
         with sqlite3.connect('commute_data.db') as conn:
             cursor = conn.cursor()
             cursor.execute('''
-                INSERT INTO commute (username, session_number, start_time, end_time, transport_mode, freeway, lane, raining)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (username, next_session_number, start_time, end_time, transport_mode, freeway, lane, raining))
+                INSERT INTO commute (username, session_number, start_time, end_time, transport_mode, freeway, lane, weather,conditions)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (username, next_session_number, start_time, end_time, transport_mode, freeway, lane, precip,conditions))
             conn.commit()
             
             
             
         # df = ca.get_data_from_db(username = username)
-        with_rain, no_rain = ca.analyze_commute_data(username)
+        CIs = ca.analyze_commute_data(username)
+        print(CIs)
         # print(username, start_time, end_time, transport_mode, freeway, lane, raining, with_rain, no_rain)  
-        print('making charts')
-        ca.make_charts()
-        print('making user charts')
-        ca.make_user_charts(username)
+        # print('making charts')
+        # ca.make_charts()
+        # print('making user charts')
+        # ca.make_user_charts(username)
         return (jsonify({
             'username':username,
             'start_time': start_time,
@@ -270,9 +272,10 @@ def submit_commute():
             'transport_mode': transport_mode,
             'freeway': freeway,
             'lane': lane,
-            'raining': raining,
-            'with_rain':with_rain,
-            'no_rain': no_rain,    
+            'weather': precip,
+            'conditions': conditions,
+            'CIs':CIs
+            # 'no_rain': no_rain,    
         }))
 
     except Exception as e:
