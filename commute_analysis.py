@@ -90,26 +90,33 @@ Returns CI for a given transit type, with and without rain.
 def analyze_commute_data(user):
     df = get_data_from_db(username = user)   
     
-    avg_wrc = {}  # For raining cases
-    avg_nrc = {}  # For non-raining cases
-
+    CI = {}
     # Define the list of transport modes
-    transports = ['car', 'bus', 'train', 'bike', 'walk']
-
-    # Loop over each transport mode and calculate CIs for rainy and non-rainy conditions
+    transports = ['car', 'bus', 'train', 'bike', 'walk', 'other']
+    precipitation = ['clear', 'rain', 'snow']
+    conditions = ['dry','wet','frozen']
     for trans in transports:
-        # Calculate CI for when it's raining
-        trans_CI_wrc = calculate_CIs(df[
-            (df['transport_mode'] == trans) & (df['raining'] == 1)
-        ])
-        avg_wrc[trans] = ['-', '-'] if np.isnan(trans_CI_wrc[0]) else trans_CI_wrc
+        CI[trans] = {}
+        for precip in precipitation:
+            CI[trans][precip] = {}
+            for condition in conditions:
+                
+                data = df[
+                    (df['transport_mode'] == trans) & 
+                    (df['weather'] == precip) & 
+                    (df['conditions'] == condition)
+                ]
+                CIs = calculate_CIs(data)
+                if not (np.isnan(CIs).any()): 
+                    CI[trans][precip][condition] = CIs
+                    
+            if not CI[trans][precip]:
+                del CI[trans][precip]
+        if not CI[trans]:  
+            del CI[trans]
 
-        trans_CI_nrc = calculate_CIs(df[
-            (df['transport_mode'] == trans) & (df['raining'] == 0)
-        ])
-        avg_nrc[trans] = ['-', '-'] if np.isnan(trans_CI_nrc[0]) else trans_CI_nrc
-        
-    return avg_wrc, avg_nrc
+                    
+    return CI
 
 
 
@@ -326,3 +333,96 @@ def make_user_charts(username):
     return pth1, pth2, pth3
         # plt.show()
 
+
+    
+def make_stacked_bars(total = True):
+    static_dir = os.path.join('static', 'images')
+    if total == True:
+        pth = os.path.join(static_dir, 'stacked_bars.png')
+
+    else:
+        pth = os.path.join(static_dir, 'avg_stacked_bars.png')
+    users = get_usernames()
+    data = pd.DataFrame()
+    for user in users.username:
+        data = pd.concat(
+            [data, 
+             get_data_from_db(username = user)]
+        )
+
+    weather = data.weather.unique()
+    conditions = data.conditions.unique()
+    transport = data.transport_mode.unique()
+
+    dictionary = {}
+
+    for trans in transport:
+        dictionary[trans] = {}
+        for weath in weather:
+            dictionary[trans][weath] = {}
+            for cond in conditions:
+                df = data[
+                    (data['transport_mode'] == trans) &
+                    (data['weather'] == weath) &
+                    (data['conditions'] == cond)
+                ]
+                if not df.empty:
+                    if total == True:
+                        dictionary[trans][weath][cond] = sum(df.commute_duration_seconds)
+                    else:
+                        dictionary[trans][weath][cond] = sum(df.commute_duration_seconds) / len(df.commute_duration_seconds)
+
+            if not dictionary[trans][weath]:
+                del dictionary[trans][weath]
+        if not dictionary[trans]:
+            del dictionary[trans]
+
+    transport_modes = []
+    weather_conditions = []
+    road_conditions = []
+    travel_times = []
+
+    for trans, item in dictionary.items():
+        for weath, item in dictionary[trans].items():
+            for cond, item in dictionary[trans][weath].items():
+                if not trans in transport_modes:
+                    transport_modes.append(trans)
+                weather_conditions.append(weath)
+
+                road_conditions.append(cond)
+                travel_times.append(item)
+
+    # Reorganize travel times into a dictionary where the key is the transport mode
+    # and the value is a list of travel times corresponding to each combination of conditions
+    condition_combinations = sorted(set([f'{weather}-{road}' for weather, road in zip(weather_conditions, road_conditions)]))
+    stacked_data = {mode: [0] * len(condition_combinations) for mode in transport_modes}
+    for mode in transport_modes:
+        for idx, condition in enumerate(condition_combinations):
+            weather, road = condition.split('-')
+            # Find the corresponding travel time for the current mode and condition
+            travel_time = dictionary.get(mode, {}).get(weather, {}).get(road, 0) /60 
+            stacked_data[mode][idx] = travel_time
+    # Now plot the stacked bar chart
+    fig, ax = plt.subplots()
+
+    bottom = np.zeros(len(condition_combinations))
+
+    # Plot the stacked bars for each transport mode
+    for idx, mode in enumerate(transport_modes):
+        ax.bar(condition_combinations, stacked_data[mode] , bottom=bottom, label=mode)
+        bottom += np.array(stacked_data[mode])
+
+    # Add labels and title
+    ax.set_xlabel('Weather and Road Conditions')
+    if total == True:
+        ax.set_ylabel('Total Travel Time (minutes)')
+        ax.set_title('Total Travel Time by Transport Mode and Conditions')
+    else:
+        ax.set_ylabel('Average Travel Time (minutes)')
+        ax.set_title('Average Travel Time by Transport Mode and Conditions')
+    ax.legend(title='Transport Mode')
+
+    plt.xticks(rotation=45)
+    # plt.yscale('log')
+    plt.tight_layout()
+    plt.savefig(pth, bbox_inches='tight')

@@ -42,7 +42,16 @@ document.addEventListener('DOMContentLoaded', async function () {
         e.preventDefault();
         const currentUser = localStorage.getItem('currentUser');
         console.log('Current User:', currentUser);
+        
+        
+    // Function to get the selected value of a radio button group
 
+    function getSelectedRadioValue(name) {
+        const selected = document.querySelector(`input[name="${name}"]:checked`);
+        return selected ? selected.value : null;
+    }
+        
+        
         const formData = {
             username: currentUser,
             start_time: document.getElementById('start_time').value,
@@ -50,9 +59,12 @@ document.addEventListener('DOMContentLoaded', async function () {
             transport_mode: document.getElementById('transport_mode').value,
             freeway: document.getElementById('freeway')?.value || null,
             lane: document.getElementById('lane')?.value || null,
-            raining: document.getElementById('raining').checked
-        };
+            precipitation: getSelectedRadioValue('weather'), // New precipitation field
+            conditions: getSelectedRadioValue('conditions') // New road condition field
 
+        };       
+        
+    
         try {
             const response = await fetch(`${baseUrl}/submit_commute`, {
                 method: 'POST',
@@ -76,29 +88,49 @@ document.addEventListener('DOMContentLoaded', async function () {
             alert('An error occurred while submitting the form.');
         }
     });
-
-    // Helper to format and display results
+    
     function displayDashboardResults(result) {
         const dashboardContent = document.getElementById('dashboardContent');
-        dashboardContent.innerHTML = '';
+        dashboardContent.innerHTML = '';  // Clear previous content
+        console.log('Received results:', result);
 
-        if (result.with_rain) {
-            dashboardContent.innerHTML += formatCommuteResults(result.with_rain, "Avg Commute with Rain");
-        }
-
-        if (result.no_rain) {
-            dashboardContent.innerHTML += formatCommuteResults(result.no_rain, "Avg Commute without Rain");
+        // Display a single table with all conditions, weather, and CI values
+        if (result.CIs) {
+            dashboardContent.innerHTML += formatCommuteResults(result.CIs);
         }
     }
+    
+// Helper function to format commute results into a table (based on nested structure)
+function formatCommuteResults(data) {
+    let content = `<table><thead><tr>
+                    <th>Transport Mode</th><th>Weather</th><th>Road Condition</th><th>Travel Time (minutes)</th></tr></thead><tbody>`;
 
-    function formatCommuteResults(data, title) {
-        let content = `<h3>${title}</h3><ul>`;
-        for (const [mode, [time, err]] of Object.entries(data)) {
-            content += `<li><strong>${mode}:</strong> ${isNaN(time) ? 'no data' : formatNumber(time)} ± ${isNaN(err) ? '-' : formatNumber(err)} minutes</li>`;
+// Loop through transport modes first
+for (const mode in data) {
+    // Loop through weather conditions within each transport mode
+    for (const weather in data[mode]) {
+        // Loop through road conditions within each weather condition
+        for (const condition in data[mode][weather]) {
+            const [time, err] = data[mode][weather][condition];
+            content += `<tr>
+                            <td><strong>${mode}</strong></td>
+                            <td>${weather}</td>
+                            <td>${condition}</td>
+                            <td>${isNaN(time) ? 'no data' : formatNumber(time)} ± ${isNaN(err) ? '-' : formatNumber(err)}</td>
+                        </tr>`;
         }
-        content += '</ul>';
-        return `<div class="table-container">${content}</div>`;
     }
+}
+
+    content += '</tbody></table>';
+    return `<div class="table-container">${content}</div>`;
+}
+
+// Helper function to format numbers with 2 decimal places
+function formatNumber(num) {
+    return num.toFixed(2);
+}
+    
 
     // Fetch base URL from config.txt
     async function fetchBaseUrl() {
